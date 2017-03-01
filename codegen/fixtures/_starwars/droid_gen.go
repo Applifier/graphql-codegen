@@ -13,9 +13,9 @@ import (
 type Droid struct {
 	Id                graphql.ID                `json:"id"`
 	Name              string                    `json:"name"`
-	Friends           *CharacterResolver        `json:"friends"`
+	Friends           *[]*CharacterResolver     `json:"friends"`
 	FriendsConnection FriendsConnectionResolver `json:"friendsConnection"`
-	AppearsIn         EpisodeResolver           `json:"appearsIn"`
+	AppearsIn         []EpisodeResolver         `json:"appearsIn"`
 	PrimaryFunction   *string                   `json:"primaryFunction"`
 }
 
@@ -32,7 +32,7 @@ func (r *DroidResolver) Name() string {
 	return r.Droid.Name
 }
 
-func (r *DroidResolver) Friends() *CharacterResolver {
+func (r *DroidResolver) Friends() *[]*CharacterResolver {
 	return r.Droid.Friends
 }
 
@@ -40,7 +40,7 @@ func (r *DroidResolver) FriendsConnection() FriendsConnectionResolver {
 	return r.Droid.FriendsConnection
 }
 
-func (r *DroidResolver) AppearsIn() EpisodeResolver {
+func (r *DroidResolver) AppearsIn() []EpisodeResolver {
 	return r.Droid.AppearsIn
 }
 

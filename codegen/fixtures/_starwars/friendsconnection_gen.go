@@ -9,10 +9,10 @@ import (
 
 // FriendsConnection A connection object for a character's friends
 type FriendsConnection struct {
-	TotalCount int64                `json:"totalCount"`
-	Edges      *FriendsEdgeResolver `json:"edges"`
-	Friends    *CharacterResolver   `json:"friends"`
-	PageInfo   PageInfoResolver     `json:"pageInfo"`
+	TotalCount int32                   `json:"totalCount"`
+	Edges      *[]*FriendsEdgeResolver `json:"edges"`
+	Friends    *[]*CharacterResolver   `json:"friends"`
+	PageInfo   PageInfoResolver        `json:"pageInfo"`
 }
 
 // FriendsConnectionResolver resolver for FriendsConnection
@@ -20,15 +20,15 @@ type FriendsConnectionResolver struct {
 	FriendsConnection
 }
 
-func (r *FriendsConnectionResolver) TotalCount() int64 {
+func (r *FriendsConnectionResolver) TotalCount() int32 {
 	return r.FriendsConnection.TotalCount
 }
 
-func (r *FriendsConnectionResolver) Edges() *FriendsEdgeResolver {
+func (r *FriendsConnectionResolver) Edges() *[]*FriendsEdgeResolver {
 	return r.FriendsConnection.Edges
 }
 
-func (r *FriendsConnectionResolver) Friends() *CharacterResolver {
+func (r *FriendsConnectionResolver) Friends() *[]*CharacterResolver {
 	return r.FriendsConnection.Friends
 }
 

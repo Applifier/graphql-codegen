@@ -15,10 +15,10 @@ type Human struct {
 	Name              string                    `json:"name"`
 	Height            float64                   `json:"height"`
 	Mass              *float64                  `json:"mass"`
-	Friends           *CharacterResolver        `json:"friends"`
+	Friends           *[]*CharacterResolver     `json:"friends"`
 	FriendsConnection FriendsConnectionResolver `json:"friendsConnection"`
-	AppearsIn         EpisodeResolver           `json:"appearsIn"`
-	Starships         *StarshipResolver         `json:"starships"`
+	AppearsIn         []EpisodeResolver         `json:"appearsIn"`
+	Starships         *[]*StarshipResolver      `json:"starships"`
 }
 
 // HumanResolver resolver for Human
@@ -42,7 +42,7 @@ func (r *HumanResolver) Mass() *float64 {
 	return r.Human.Mass
 }
 
-func (r *HumanResolver) Friends() *CharacterResolver {
+func (r *HumanResolver) Friends() *[]*CharacterResolver {
 	return r.Human.Friends
 }
 
@@ -50,11 +50,11 @@ func (r *HumanResolver) FriendsConnection() FriendsConnectionResolver {
 	return r.Human.FriendsConnection
 }
 
-func (r *HumanResolver) AppearsIn() EpisodeResolver {
+func (r *HumanResolver) AppearsIn() []EpisodeResolver {
 	return r.Human.AppearsIn
 }
 
-func (r *HumanResolver) Starships() *StarshipResolver {
+func (r *HumanResolver) Starships() *[]*StarshipResolver {
 	return r.Human.Starships
 }
 

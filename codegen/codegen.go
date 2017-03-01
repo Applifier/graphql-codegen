@@ -183,10 +183,12 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 			return "", "", nil, err
 		}
 
+		fieldTypeName := getTypeName(fp.Type(), conf)
+
 		tmpl.Execute(fieldCode, map[string]interface{}{
 			"FieldName":        name,
 			"FieldDescription": fp.Description(),
-			"FieldType":        getPointer(getTypeName(fp.Type(), conf), fp),
+			"FieldType":        fieldTypeName,
 			"Config":           conf,
 			"TemplateConfig":   templateConfig,
 		})
@@ -199,7 +201,7 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 		tmpl.Execute(methodCode, map[string]interface{}{
 			"TypeName":         typeName,
 			"MethodName":       name,
-			"MethodReturnType": getPointer(getTypeName(fp.Type(), conf), fp),
+			"MethodReturnType": fieldTypeName,
 			"MethodReturn":     name,
 			"Config":           conf,
 			"TemplateConfig":   templateConfig,
@@ -233,21 +235,35 @@ func getImports(tp *introspection.Type, conf config.Config) []string {
 	return []string{}
 }
 
-func getTypeName(tp *introspection.Type, conf config.Config) string {
-	name := tp.Name()
-	if name != nil {
-		if val, ok := internalTypeConfig[*name]; ok {
-			return val.goType
-		}
-
-		return *name + "Resolver"
+func getTypeName(tp *introspection.Type, conf config.Config) (typ string) {
+FindGoType:
+	if tp.Kind() == "NON_NULL" {
+		tp = tp.OfType()
+	} else {
+		typ = typ + "*"
 	}
 
-	if tp.OfType() != nil {
-		return getTypeName(tp.OfType(), conf)
+	if tp.Kind() == "LIST" {
+		tp = tp.OfType()
+		typ = typ + "[]"
+		goto FindGoType
 	}
 
-	return "NO_TYPE_FOUND"
+	switch *tp.Name() {
+	case "String":
+		typ = typ + "string"
+	case "Int":
+		typ = typ + "int32"
+	case "Float":
+		typ = typ + "float64"
+	case "ID":
+		typ = typ + "graphql.ID"
+	case "Boolean":
+		typ = typ + "bool"
+	default:
+		typ = typ + *tp.Name() + "Resolver"
+	}
+	return
 }
 
 func removeDuplicates(a []string) []string {
