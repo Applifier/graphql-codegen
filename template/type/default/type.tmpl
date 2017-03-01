@@ -1,0 +1,24 @@
+package main;
+
+import (
+  graphql "github.com/neelance/graphql-go"
+)
+
+// PageInfo Information for paginating this connection
+type pageInfoResolver struct {
+  startCursor                   graphql.ID
+  endCursor          graphql.ID
+  hasNextPage        bool
+}
+
+func (r *pageInfoResolver) StartCursor() *graphql.ID {
+  return &r.startCursor
+}
+
+func (r *pageInfoResolver) EndCursor() *graphql.ID {
+  return &r.endCursor
+}
+
+func (r *pageInfoResolver) HasNextPage() bool {
+  return r.hasNextPage
+}

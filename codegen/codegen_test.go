@@ -25,7 +25,7 @@ func TestCodegen(t *testing.T) {
     }
     `,
 			expected: map[string]string{
-				"page_info_gen.go": `
+				"pageinfo_gen.go": `
         package main;
 
         import (

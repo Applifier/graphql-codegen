@@ -5,7 +5,8 @@ type FieldConfig struct {
 }
 
 type TypeConfig struct {
-	Field map[string]FieldConfig
+	Template map[string]map[string]interface{}
+	Field    map[string]FieldConfig
 }
 
 type Config struct {
