@@ -270,6 +270,9 @@ func removeDuplicates(a []string) []string {
 }
 
 func capitalise(str string) string {
+	if strings.ToLower(str) == "id" {
+		return "ID"
+	}
 	return strings.ToUpper(string(str[0])) + str[1:]
 }
 

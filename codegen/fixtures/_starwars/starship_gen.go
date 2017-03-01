@@ -11,7 +11,7 @@ import (
 
 // Starship
 type Starship struct {
-	Id     graphql.ID `json:"id"`
+	ID     graphql.ID `json:"id"`
 	Name   string     `json:"name"`
 	Length float64    `json:"length"`
 }
@@ -21,8 +21,8 @@ type StarshipResolver struct {
 	Starship
 }
 
-func (r *StarshipResolver) Id() graphql.ID {
-	return r.Starship.Id
+func (r *StarshipResolver) ID() graphql.ID {
+	return r.Starship.ID
 }
 
 func (r *StarshipResolver) Name() string {

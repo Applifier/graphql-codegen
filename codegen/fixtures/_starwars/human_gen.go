@@ -11,7 +11,7 @@ import (
 
 // Human A humanoid creature from the Star Wars universe
 type Human struct {
-	Id                graphql.ID                `json:"id"`
+	ID                graphql.ID                `json:"id"`
 	Name              string                    `json:"name"`
 	Height            float64                   `json:"height"`
 	Mass              *float64                  `json:"mass"`
@@ -26,8 +26,8 @@ type HumanResolver struct {
 	Human
 }
 
-func (r *HumanResolver) Id() graphql.ID {
-	return r.Human.Id
+func (r *HumanResolver) ID() graphql.ID {
+	return r.Human.ID
 }
 
 func (r *HumanResolver) Name() string {

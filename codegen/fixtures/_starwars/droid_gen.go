@@ -11,7 +11,7 @@ import (
 
 // Droid An autonomous mechanical character in the Star Wars universe
 type Droid struct {
-	Id                graphql.ID                `json:"id"`
+	ID                graphql.ID                `json:"id"`
 	Name              string                    `json:"name"`
 	Friends           *[]*CharacterResolver     `json:"friends"`
 	FriendsConnection FriendsConnectionResolver `json:"friendsConnection"`
@@ -24,8 +24,8 @@ type DroidResolver struct {
 	Droid
 }
 
-func (r *DroidResolver) Id() graphql.ID {
-	return r.Droid.Id
+func (r *DroidResolver) ID() graphql.ID {
+	return r.Droid.ID
 }
 
 func (r *DroidResolver) Name() string {
