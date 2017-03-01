@@ -7,10 +7,10 @@ generate:
 	go generate ./...
 .PHONY: generate
 
-test:
+test: generate
 	go test ./...
 .PHONY: test
 
-record:
+record: generate
 	RECORD_FIXTURES=yes go test ./...
 .PHONY: record

@@ -1,3 +1,6 @@
+// This code is genereated by graphql-codegen
+// DO NOT EDIT!
+
 package basic
 
 import (
