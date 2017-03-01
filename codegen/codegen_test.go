@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 	"testing"
@@ -29,6 +30,11 @@ func TestCodegen(t *testing.T) {
 
 		cfg, _ := config.Parse(string(confBytes))
 
-		RunTest(string(schemaBytes), cfg, exectedFilesMap, t)
+		fileMap := RunTest(string(schemaBytes), cfg, exectedFilesMap, t)
+		if os.Getenv("RECORD_FIXTURES") == "yes" {
+			for filename, data := range fileMap {
+				ioutil.WriteFile(path.Join("fixtures", testDir.Name(), filename), []byte(data), 0644)
+			}
+		}
 	}
 }

@@ -6,3 +6,11 @@ setup:
 generate:
 	go generate ./...
 .PHONY: generate
+
+test:
+	go test ./...
+.PHONY: test
+
+record:
+	RECORD_FIXTURES=yes go test ./...
+.PHONY: record
