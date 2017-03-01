@@ -12,14 +12,14 @@ func RunTest(schema string, conf config.Config, expected map[string]string, t *t
 		t.Fatal(err)
 	}
 
-	for file, expectedCode := range expected {
-		code, err := FormatCode(expectedCode)
+	for file, resultingCode := range fileMap {
+		code, err := FormatCode(expected[file])
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if string(code) != fileMap[file] {
-			t.Errorf("Generated file %s content\n%s\n\nshould have matched\n\n%s", file, fileMap[file], code)
+		if string(code) != resultingCode {
+			t.Errorf("Generated file %s content\n%s\n\nshould have matched\n\n%s", file, resultingCode, code)
 		}
 	}
 }

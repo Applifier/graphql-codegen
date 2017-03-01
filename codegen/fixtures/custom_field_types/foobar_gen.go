@@ -1,4 +1,4 @@
-package main
+package custom_field_types
 
 import (
 	"encoding/json"
