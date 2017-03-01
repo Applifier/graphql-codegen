@@ -17,13 +17,13 @@ func TestCodegen(t *testing.T) {
 				Package: "main",
 			},
 			schema: `
-    # Information for paginating this connection
-    type PageInfo {
-      startCursor: ID
-      endCursor: ID
-      hasNextPage: Boolean!
-    }
-    `,
+      # Information for paginating this connection
+      type PageInfo {
+        startCursor: ID
+        endCursor: ID
+        hasNextPage: Boolean!
+      }
+      `,
 			expected: map[string]string{
 				"pageinfo_gen.go": `
         package main;
@@ -49,6 +49,62 @@ func TestCodegen(t *testing.T) {
 
         func (r *pageInfoResolver) HasNextPage() bool {
         	return r.hasNextPage
+        }
+        `,
+			},
+		},
+		{
+			config: config.Config{
+				Package: "main",
+			},
+			schema: `
+      type Foobar {
+        foo: String
+        bar: String!
+      }
+
+      type Barfoo {
+        id: ID
+        foo: Foobar
+      }
+      `,
+			expected: map[string]string{
+				"barfoo_gen.go": `
+        package main
+
+        import (
+          graphql "github.com/neelance/graphql-go"
+        )
+
+        // barfooResolver
+        type barfooResolver struct {
+          id *graphql.ID
+          foo *foobarResolver
+        }
+
+        func (r *barfooResolver) Id() *graphql.ID {
+          return r.id
+        }
+
+        func (r *barfooResolver) Foo() *foobarResolver {
+          return r.foo
+        }
+        `,
+				"foobar_gen.go": `
+        package main;
+
+        // foobarResolver
+        type foobarResolver struct {
+          foo       *string
+          bar       string
+        }
+
+        func (r *foobarResolver) Foo() *string {
+	        return r.foo
+        }
+
+        func (r *foobarResolver) Bar() string {
+	        return r.bar
         }
         `,
 			},

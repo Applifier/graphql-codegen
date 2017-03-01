@@ -1,7 +1,9 @@
 package {{.Config.Package}};
 
 import (
-  graphql "github.com/neelance/graphql-go"
+  {{range .Imports}}
+    {{.}}
+  {{end}}
 )
 
 // {{.TypeName}}Resolver {{.TypeDescription}}
