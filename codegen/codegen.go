@@ -3,6 +3,7 @@ package codegen
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"strings"
 	"text/template"
 
@@ -37,7 +38,7 @@ var (
 		},
 		"Int": typeConfig{
 			true,
-			"int64",
+			"int32",
 			"",
 		},
 		"ID": typeConfig{
@@ -80,9 +81,17 @@ func Generate(graphSchema string, conf config.Config) (map[string]string, error)
 
 		fileName := fmt.Sprintf("%s_gen.go", strings.ToLower(name))
 
-		code, err := generateType(qlType, conf)
-		if err != nil {
-			return nil, err
+		log.Printf("Generating Go code for %s %s", qlType.Kind(), name)
+
+		var code string
+		switch qlType.Kind() {
+		default:
+			log.Printf("%s not supported yet", qlType.Kind())
+		case "OBJECT":
+			code, err = generateType(qlType, conf)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		results[fileName] = code
