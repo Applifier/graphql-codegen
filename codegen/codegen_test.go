@@ -1,15 +1,19 @@
 package codegen
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/Applifier/graphql-codegen/config"
+)
 
 func TestCodegen(t *testing.T) {
 	tests := []struct {
 		schema   string
-		config   Config
+		config   config.Config
 		expected map[string]string
 	}{
 		{
-			config: Config{
+			config: config.Config{
 				Package: "main",
 			},
 			schema: `

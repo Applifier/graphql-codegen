@@ -1,11 +1,12 @@
 package codegen
 
 import (
+	"github.com/Applifier/graphql-codegen/config"
 	"github.com/davecgh/go-spew/spew"
 	graphql "github.com/neelance/graphql-go"
 )
 
-func Generate(graphSchema string, config Config) (map[string]string, error) {
+func Generate(graphSchema string, conf config.Config) (map[string]string, error) {
 	sch, err := graphql.ParseSchema(graphSchema, nil)
 	if err != nil {
 		return nil, err

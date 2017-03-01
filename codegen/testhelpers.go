@@ -1,9 +1,13 @@
 package codegen
 
-import "testing"
+import (
+	"testing"
 
-func RunTest(schema string, config Config, expected map[string]string, t *testing.T) {
-	fileMap, err := Generate(schema, config)
+	"github.com/Applifier/graphql-codegen/config"
+)
+
+func RunTest(schema string, conf config.Config, expected map[string]string, t *testing.T) {
+	fileMap, err := Generate(schema, conf)
 	if err != nil {
 		t.Fatal(err)
 	}
