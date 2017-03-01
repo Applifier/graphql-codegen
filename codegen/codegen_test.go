@@ -16,6 +16,10 @@ func TestCodegen(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, testDir := range testDirs {
+		if strings.HasPrefix(testDir.Name(), "_") && os.Getenv("UNSTABLE_TEST") != "yes" {
+			continue
+		}
+
 		schemaBytes, _ := ioutil.ReadFile(path.Join("fixtures", testDir.Name(), "schema.graphql"))
 		confBytes, _ := ioutil.ReadFile(path.Join("fixtures", testDir.Name(), "config.hcl"))
 		exectedFiles, _ := ioutil.ReadDir(path.Join("fixtures", testDir.Name()))
