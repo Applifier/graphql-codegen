@@ -254,7 +254,9 @@ check:
 		return typ + val.goType
 	}
 
-	return typ + *name + "Resolver"
+	typ = typ + *name + "Resolver"
+
+	return
 }
 
 func removeDuplicates(a []string) []string {

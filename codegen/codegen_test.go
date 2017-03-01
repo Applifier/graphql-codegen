@@ -11,7 +11,7 @@ import (
 )
 
 func TestCodegen(t *testing.T) {
-	testDirs, err := ioutil.ReadDir("fixtures")
+	testDirs, err := ioutil.ReadDir("_fixtures")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,14 +20,14 @@ func TestCodegen(t *testing.T) {
 			continue
 		}
 
-		schemaBytes, _ := ioutil.ReadFile(path.Join("fixtures", testDir.Name(), "schema.graphql"))
-		confBytes, _ := ioutil.ReadFile(path.Join("fixtures", testDir.Name(), "config.hcl"))
-		exectedFiles, _ := ioutil.ReadDir(path.Join("fixtures", testDir.Name()))
+		schemaBytes, _ := ioutil.ReadFile(path.Join("_fixtures", testDir.Name(), "schema.graphql"))
+		confBytes, _ := ioutil.ReadFile(path.Join("_fixtures", testDir.Name(), "config.hcl"))
+		exectedFiles, _ := ioutil.ReadDir(path.Join("_fixtures", testDir.Name()))
 		exectedFilesMap := map[string]string{}
 
 		for _, f := range exectedFiles {
 			if strings.HasSuffix(f.Name(), ".go") {
-				expectedBytes, _ := ioutil.ReadFile(path.Join("fixtures", testDir.Name(), f.Name()))
+				expectedBytes, _ := ioutil.ReadFile(path.Join("_fixtures", testDir.Name(), f.Name()))
 				exectedFilesMap[f.Name()] = string(expectedBytes)
 			}
 		}
