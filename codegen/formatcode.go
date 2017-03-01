@@ -12,7 +12,11 @@ func FormatCode(code string) ([]byte, error) {
 	var out bytes.Buffer
 	fmtCmd.Stdout = &out
 	if err := fmtCmd.Run(); err != nil {
-		return nil, err
+		return []byte(code), err
+	}
+
+	if out.Len() == 0 {
+		return []byte(code), nil
 	}
 
 	return out.Bytes(), nil
