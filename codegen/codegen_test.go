@@ -32,19 +32,19 @@ func TestCodegen(t *testing.T) {
           graphql "github.com/neelance/graphql-go"
         )
 
-        // PageInfo Information for paginating this connection
+        // pageInfoResolver Information for paginating this connection
         type pageInfoResolver struct {
-          startCursor                   graphql.ID
-          endCursor          graphql.ID
+          startCursor        *graphql.ID
+          endCursor          *graphql.ID
           hasNextPage        bool
         }
 
         func (r *pageInfoResolver) StartCursor() *graphql.ID {
-	        return &r.startCursor
+	        return r.startCursor
         }
 
         func (r *pageInfoResolver) EndCursor() *graphql.ID {
-        	return &r.endCursor
+        	return r.endCursor
         }
 
         func (r *pageInfoResolver) HasNextPage() bool {
