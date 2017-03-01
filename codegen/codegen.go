@@ -236,7 +236,7 @@ func getImports(tp *introspection.Type, conf config.Config) []string {
 }
 
 func getTypeName(tp *introspection.Type, conf config.Config) (typ string) {
-FindGoType:
+check:
 	if tp.Kind() == "NON_NULL" {
 		tp = tp.OfType()
 	} else {
@@ -246,24 +246,15 @@ FindGoType:
 	if tp.Kind() == "LIST" {
 		tp = tp.OfType()
 		typ = typ + "[]"
-		goto FindGoType
+		goto check
 	}
 
-	switch *tp.Name() {
-	case "String":
-		typ = typ + "string"
-	case "Int":
-		typ = typ + "int32"
-	case "Float":
-		typ = typ + "float64"
-	case "ID":
-		typ = typ + "graphql.ID"
-	case "Boolean":
-		typ = typ + "bool"
-	default:
-		typ = typ + *tp.Name() + "Resolver"
+	name := tp.Name()
+	if val, ok := internalTypeConfig[*name]; ok {
+		return typ + val.goType
 	}
-	return
+
+	return typ + *name + "Resolver"
 }
 
 func removeDuplicates(a []string) []string {
