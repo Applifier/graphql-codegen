@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"bytes"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -11,6 +12,7 @@ func FormatCode(code string) ([]byte, error) {
 	fmtCmd.Stdin = strings.NewReader(code)
 	var out bytes.Buffer
 	fmtCmd.Stdout = &out
+	fmtCmd.Stderr = os.Stderr
 	if err := fmtCmd.Run(); err != nil {
 		return []byte(code), err
 	}

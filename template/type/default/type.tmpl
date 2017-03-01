@@ -1,14 +1,28 @@
 package {{.Config.Package}};
 
 import (
+  "encoding/json"
   {{range .Imports}}
     {{.}}
   {{end}}
 )
 
-// {{.TypeName}}Resolver {{.TypeDescription}}
-type {{.TypeName}}Resolver struct {
+// {{.TypeName}} {{.TypeDescription}}
+type {{.TypeName}} struct {
   {{range .Fields}}{{.}}{{end}}
+}
+
+// {{.TypeName}}Resolver resolver for {{.TypeName}}
+type {{.TypeName}}Resolver struct {
+  {{.TypeName}}
+}
+
+func (r *{{.TypeName}}Resolver) MarshalJSON() ([]byte, error) {
+  return json.Marshal(&r.{{.TypeName}})
+}
+
+func (r *{{.TypeName}}Resolver) UnmarshalJSON(data []byte) error {
+  return json.Unmarshal(data, &r.{{.TypeName}})
 }
 
 {{range .Methods}}{{.}}

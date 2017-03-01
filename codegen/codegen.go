@@ -51,6 +51,11 @@ var (
 			"",
 		},
 	}
+
+	templateFunMap = template.FuncMap{
+		"capitalize":   capitalise,
+		"uncapitalize": unCapitalise,
+	}
 )
 
 func Generate(graphSchema string, conf config.Config) (map[string]string, error) {
@@ -110,13 +115,12 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 			return "", err
 		}
 
-		tmpl, err := template.New(templateName).Parse(strings.Trim(typeTemplate.TypeTemplate, " \t"))
+		tmpl, err := template.New(templateName).Funcs(templateFunMap).Parse(strings.Trim(typeTemplate.TypeTemplate, " \t"))
 		if err != nil {
 			return "", err
 		}
 
 		// Move this to a util func
-		typeName := unCapitalise(name)
 		ifields := *tp.Fields(&struct{ IncludeDeprecated bool }{true})
 		fields := make([]string, len(ifields))
 		methods := make([]string, len(ifields))
@@ -133,7 +137,7 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 		}
 
 		tmpl.Execute(buf, map[string]interface{}{
-			"TypeName":        typeName,
+			"TypeName":        name,
 			"TypeDescription": returnString(tp.Description()),
 			"Config":          conf,
 			"Fields":          fields,
@@ -141,7 +145,7 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 			"Imports":         removeDuplicates(imports),
 		})
 	}
-
+	//println(string(buf.Bytes()))
 	b, err := FormatCode(string(buf.Bytes()))
 	return string(b), err
 }
@@ -159,37 +163,37 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 		propConf.Template["default"] = map[string]interface{}{}
 	}
 
-	for templateName, _ := range propConf.Template {
+	for templateName, templateConfig := range propConf.Template {
 		propTemplate, err := codegenTemplate.GetPropertyTemplate(templateName)
 		if err != nil {
 			return "", "", nil, err
 		}
 
-		tmpl, err := template.New(templateName).Parse(strings.Trim(propTemplate.FieldTemplate, " \t"))
+		tmpl, err := template.New(templateName).Funcs(templateFunMap).Parse(strings.Trim(propTemplate.FieldTemplate, " \t"))
 		if err != nil {
 			return "", "", nil, err
 		}
 
-		fieldName := unCapitalise(name)
-
 		tmpl.Execute(fieldCode, map[string]interface{}{
-			"FieldName":        fieldName,
+			"FieldName":        name,
 			"FieldDescription": fp.Description(),
 			"FieldType":        getPointer(getTypeName(fp.Type(), conf), fp),
 			"Config":           conf,
+			"TemplateConfig":   templateConfig,
 		})
 
-		tmpl, err = template.New(templateName).Parse(propTemplate.MethodTemplate)
+		tmpl, err = template.New(templateName).Funcs(templateFunMap).Parse(propTemplate.MethodTemplate)
 		if err != nil {
 			return "", "", nil, err
 		}
 
 		tmpl.Execute(methodCode, map[string]interface{}{
-			"TypeName":         unCapitalise(typeName),
-			"MethodName":       capitalise(name),
+			"TypeName":         typeName,
+			"MethodName":       name,
 			"MethodReturnType": getPointer(getTypeName(fp.Type(), conf), fp),
-			"MethodReturn":     fieldName,
+			"MethodReturn":     name,
 			"Config":           conf,
+			"TemplateConfig":   templateConfig,
 		})
 
 		imports = append(imports, getImports(fp.Type(), conf)...)
@@ -227,7 +231,7 @@ func getTypeName(tp *introspection.Type, conf config.Config) string {
 			return val.goType
 		}
 
-		return unCapitalise(*name) + "Resolver"
+		return *name + "Resolver"
 	}
 
 	if tp.OfType() != nil {

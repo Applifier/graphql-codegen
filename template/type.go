@@ -2,6 +2,7 @@ package template
 
 import (
 	"errors"
+	"path"
 
 	"github.com/hashicorp/hcl"
 )
@@ -33,7 +34,7 @@ func loadStoredTypeTemplate(template string) (*TypeTemplate, bool, error) {
 		return nil, false, err
 	}
 
-	templateString, err := Asset(template + "/" + cfg.Type)
+	templateString, err := Asset(path.Join(template, cfg.Type))
 	if err != nil {
 		return nil, false, err
 	}
