@@ -18,14 +18,6 @@ type BarFooResolver struct {
 	BarFoo
 }
 
-func (r *BarFooResolver) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&r.BarFoo)
-}
-
-func (r *BarFooResolver) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, &r.BarFoo)
-}
-
 func (r *BarFooResolver) StartCursor() *graphql.ID {
 	return r.BarFoo.StartCursor
 }
@@ -36,4 +28,12 @@ func (r *BarFooResolver) EndCursor() *graphql.ID {
 
 func (r *BarFooResolver) HasNextPage() bool {
 	return r.BarFoo.HasNextPage
+}
+
+func (r *BarFooResolver) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&r.BarFoo)
+}
+
+func (r *BarFooResolver) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &r.BarFoo)
 }

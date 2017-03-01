@@ -18,14 +18,6 @@ type PageInfoResolver struct {
 	PageInfo
 }
 
-func (r *PageInfoResolver) MarshalJSON() ([]byte, error) {
-	return json.Marshal(&r.PageInfo)
-}
-
-func (r *PageInfoResolver) UnmarshalJSON(data []byte) error {
-	return json.Unmarshal(data, &r.PageInfo)
-}
-
 func (r *PageInfoResolver) StartCursor() *graphql.ID {
 	return r.PageInfo.StartCursor
 }
@@ -36,4 +28,12 @@ func (r *PageInfoResolver) EndCursor() *graphql.ID {
 
 func (r *PageInfoResolver) HasNextPage() bool {
 	return r.PageInfo.HasNextPage
+}
+
+func (r *PageInfoResolver) MarshalJSON() ([]byte, error) {
+	return json.Marshal(&r.PageInfo)
+}
+
+func (r *PageInfoResolver) UnmarshalJSON(data []byte) error {
+	return json.Unmarshal(data, &r.PageInfo)
 }

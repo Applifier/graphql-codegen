@@ -17,6 +17,9 @@ type {{.TypeName}}Resolver struct {
   {{.TypeName}}
 }
 
+{{range .Methods}}{{.}}
+{{end}}
+
 func (r *{{.TypeName}}Resolver) MarshalJSON() ([]byte, error) {
   return json.Marshal(&r.{{.TypeName}})
 }
@@ -24,6 +27,3 @@ func (r *{{.TypeName}}Resolver) MarshalJSON() ([]byte, error) {
 func (r *{{.TypeName}}Resolver) UnmarshalJSON(data []byte) error {
   return json.Unmarshal(data, &r.{{.TypeName}})
 }
-
-{{range .Methods}}{{.}}
-{{end}}
