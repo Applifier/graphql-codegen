@@ -37,7 +37,7 @@ func TestCodegen(t *testing.T) {
 		fileMap := RunTest(string(schemaBytes), cfg, exectedFilesMap, t)
 		if os.Getenv("RECORD_FIXTURES") == "yes" {
 			for filename, data := range fileMap {
-				ioutil.WriteFile(path.Join("fixtures", testDir.Name(), filename), []byte(data), 0644)
+				ioutil.WriteFile(path.Join("_fixtures", testDir.Name(), filename), []byte(data), 0644)
 			}
 		}
 	}
