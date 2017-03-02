@@ -90,7 +90,7 @@ func Generate(graphSchema string, conf config.Config) (map[string]string, error)
 			if err != nil {
 				return nil, err
 			}
-		case "ENUM", "INPUT_OBJECT", "UNION":
+		case "ENUM", "INPUT_OBJECT":
 			log.Printf("%s not supported yet", qlType.Kind())
 		}
 
@@ -130,7 +130,11 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 		}
 
 		// Move this to a util func
-		ifields := *tp.Fields(&struct{ IncludeDeprecated bool }{true})
+		var ifields []*introspection.Field
+		if tp.Fields(&struct{ IncludeDeprecated bool }{true}) != nil {
+			ifields = *tp.Fields(&struct{ IncludeDeprecated bool }{true})
+		}
+
 		fields := make([]string, len(ifields))
 		methods := make([]string, len(ifields))
 		imports := []string{}

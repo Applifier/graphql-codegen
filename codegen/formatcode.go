@@ -8,7 +8,6 @@ import (
 )
 
 func FormatCode(code string) ([]byte, error) {
-	println(code)
 	fmtCmd := exec.Command("gofmt", "-s")
 	fmtCmd.Stdin = strings.NewReader(code)
 	var out bytes.Buffer

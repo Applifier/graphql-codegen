@@ -35,6 +35,7 @@ func (r *{{.TypeName}}Resolver) UnmarshalJSON(data []byte) error {
   return json.Unmarshal(data, &r.{{.TypeName}})
 }
 {{end}}
+
 {{if eq .Kind "INTERFACE"}}
 // {{.TypeName}} {{.TypeDescription}}
 type {{.TypeName}} interface {
@@ -53,5 +54,19 @@ type {{.TypeName}}Resolver struct {
   }
 {{end}}
 
+{{end}}
+
+{{if eq .Kind "UNION"}}
+// {{.TypeName}}Resolver resolver for {{.TypeName}}
+type {{.TypeName}}Resolver struct {
+  {{.TypeName | uncapitalize}} interface{}
+}
+{{ $typeName := .TypeName }}
+{{range $possibleType := .PossibleTypes}}
+  func (r *{{$typeName}}Resolver) To{{$possibleType}}() (*{{$possibleType}}Resolver, bool) {
+    c, ok := r.{{$typeName | uncapitalize}}.(*{{$possibleType}}Resolver)
+	   return c, ok
+  }
+{{end}}
 
 {{end}}
