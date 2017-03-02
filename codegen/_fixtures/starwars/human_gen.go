@@ -17,7 +17,7 @@ type Human struct {
 	Mass              *float64                  `json:"mass"`
 	Friends           *[]*CharacterResolver     `json:"friends"`
 	FriendsConnection FriendsConnectionResolver `json:"friendsConnection"`
-	AppearsIn         []EpisodeResolver         `json:"appearsIn"`
+	AppearsIn         []Episode                 `json:"appearsIn"`
 	Starships         *[]*StarshipResolver      `json:"starships"`
 }
 
@@ -34,7 +34,9 @@ func (r *HumanResolver) Name() string {
 	return r.Human.Name
 }
 
-func (r *HumanResolver) Height() float64 {
+func (r *HumanResolver) Height(args *struct {
+	Unit *LengthUnit
+}) float64 {
 	return r.Human.Height
 }
 
@@ -46,11 +48,14 @@ func (r *HumanResolver) Friends() *[]*CharacterResolver {
 	return r.Human.Friends
 }
 
-func (r *HumanResolver) FriendsConnection() FriendsConnectionResolver {
+func (r *HumanResolver) FriendsConnection(args *struct {
+	First *int32
+	After *graphql.ID
+}) FriendsConnectionResolver {
 	return r.Human.FriendsConnection
 }
 
-func (r *HumanResolver) AppearsIn() []EpisodeResolver {
+func (r *HumanResolver) AppearsIn() []Episode {
 	return r.Human.AppearsIn
 }
 

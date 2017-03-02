@@ -29,7 +29,9 @@ func (r *StarshipResolver) Name() string {
 	return r.Starship.Name
 }
 
-func (r *StarshipResolver) Length() float64 {
+func (r *StarshipResolver) Length(args *struct {
+	Unit *LengthUnit
+}) float64 {
 	return r.Starship.Length
 }
 

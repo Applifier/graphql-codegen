@@ -56,6 +56,7 @@ var (
 	templateFunMap = template.FuncMap{
 		"capitalize":   capitalise,
 		"uncapitalize": unCapitalise,
+		"is_entry":     isEntryPoint,
 	}
 )
 
@@ -69,6 +70,8 @@ func Generate(graphSchema string, conf config.Config) (map[string]string, error)
 
 	results := map[string]string{}
 
+	var entryPoint = false
+
 	for _, qlType := range ins.Types() {
 		name := *qlType.Name()
 		if strings.HasPrefix(name, "_") {
@@ -77,6 +80,10 @@ func Generate(graphSchema string, conf config.Config) (map[string]string, error)
 
 		if internalTypeConfig[name].ignore {
 			continue
+		}
+
+		if isEntryPoint(name) {
+			entryPoint = true
 		}
 
 		fileName := fmt.Sprintf("%s_gen.go", strings.ToLower(name))
@@ -92,6 +99,15 @@ func Generate(graphSchema string, conf config.Config) (map[string]string, error)
 		results[fileName] = code
 	}
 
+	// Generate entry point
+	if entryPoint {
+		entry, err := generateEntryPoint(conf)
+		if err != nil {
+			return nil, err
+		}
+		results["resolver_gen.go"] = entry
+	}
+
 	return results, nil
 }
 
@@ -100,6 +116,30 @@ func returnString(strPtr *string) string {
 		return *strPtr
 	}
 	return ""
+}
+
+func generateEntryPoint(conf config.Config) (string, error) {
+	// TODO figure out if this needs to be configurable
+	typeTemplate, err := codegenTemplate.GetTypeTemplate("default")
+	if err != nil {
+		return "", err
+	}
+
+	tmpl, err := template.New("default").Funcs(templateFunMap).Parse(strings.Trim(typeTemplate.TypeTemplate, " \t"))
+	if err != nil {
+		return "", err
+	}
+
+	buf := &bytes.Buffer{}
+	tmpl.Execute(buf, map[string]interface{}{
+		"Kind":            "RESOLVER",
+		"TypeName":        "Resolver",
+		"TypeDescription": "Resolver is the main resolver for all queries",
+		"Config":          conf,
+	})
+
+	b, err := FormatCode(string(buf.Bytes()))
+	return string(b), err
 }
 
 func generateType(tp *introspection.Type, conf config.Config) (code string, err error) {
@@ -213,7 +253,7 @@ func generateInputValue(ip *introspection.InputValue, tp *introspection.Type, ty
 			return "", nil, err
 		}
 
-		fieldTypeName := getTypeName(ip.Type(), conf)
+		fieldTypeName := getTypeName(ip.Type(), conf, false)
 
 		tmpl.Execute(fieldCode, map[string]interface{}{
 			"TypeKind":         tp.Kind(),
@@ -269,7 +309,21 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 			return "", "", nil, err
 		}
 
-		fieldTypeName := getTypeName(fp.Type(), conf)
+		fieldTypeName := getTypeName(fp.Type(), conf, false)
+
+		type fieldArgument struct {
+			Name string
+			Type string
+		}
+		fieldArguments := make([]fieldArgument, 0, len(fp.Args()))
+
+		for _, field := range fp.Args() {
+			fieldArguments = append(fieldArguments, fieldArgument{
+				Name: field.Name(),
+				Type: getTypeName(field.Type(), conf, true),
+			})
+			imports = append(imports, getImports(field.Type(), conf)...)
+		}
 
 		tmpl.Execute(fieldCode, map[string]interface{}{
 			"TypeKind":         tp.Kind(),
@@ -288,6 +342,7 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 		tmpl.Execute(methodCode, map[string]interface{}{
 			"TypeKind":         tp.Kind(),
 			"TypeName":         typeName,
+			"MethodArguments":  fieldArguments,
 			"MethodName":       name,
 			"MethodReturnType": fieldTypeName,
 			"MethodReturn":     name,
@@ -323,7 +378,7 @@ func getImports(tp *introspection.Type, conf config.Config) []string {
 	return []string{}
 }
 
-func getTypeName(tp *introspection.Type, conf config.Config) (typ string) {
+func getTypeName(tp *introspection.Type, conf config.Config, input bool) (typ string) {
 check:
 	if tp.Kind() == "NON_NULL" {
 		tp = tp.OfType()
@@ -342,7 +397,17 @@ check:
 		return typ + val.goType
 	}
 
-	typ = typ + *name + "Resolver"
+	if tp.Kind() == "ENUM" {
+		typ = typ + *name
+	} else if tp.Kind() != "INPUT_OBJECT" {
+		typ = typ + *name + "Resolver"
+	} else {
+		typ = typ + *name
+	}
+
+	if typ[0] != '*' && tp.Kind() == "INPUT_OBJECT" {
+		typ = "*" + typ
+	}
 
 	return
 }
@@ -357,6 +422,10 @@ func removeDuplicates(a []string) []string {
 		}
 	}
 	return result
+}
+
+func isEntryPoint(a string) bool {
+	return a == "Mutation" || a == "Query"
 }
 
 func capitalise(str string) string {

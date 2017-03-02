@@ -15,9 +15,12 @@ type Character interface {
 
 	Friends() *[]*CharacterResolver
 
-	FriendsConnection() FriendsConnectionResolver
+	FriendsConnection(args *struct {
+		First *int32
+		After *graphql.ID
+	}) FriendsConnectionResolver
 
-	AppearsIn() []EpisodeResolver
+	AppearsIn() []Episode
 }
 
 // CharacterResolver resolver for Character

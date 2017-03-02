@@ -6,14 +6,16 @@ package {{.Config.Package}};
 
 import (
 {{if eq .Kind "OBJECT"}}
+  {{if not (is_entry .TypeName) }}
   "encoding/json"
+  {{end}}
 {{end}}
   {{range .Imports}}
     {{.}}
   {{end}}
 )
-
 {{if eq .Kind "OBJECT"}}
+{{if not (is_entry .TypeName) }}
 // {{.TypeName}} {{.TypeDescription}}
 type {{.TypeName}} struct {
   {{range .Fields}}{{.}}{{end}}
@@ -23,10 +25,10 @@ type {{.TypeName}} struct {
 type {{.TypeName}}Resolver struct {
   {{.TypeName}}
 }
-
+{{end}}
 {{range .Methods}}{{.}}
 {{end}}
-
+{{if not (is_entry .TypeName) }}
 func (r *{{.TypeName}}Resolver) MarshalJSON() ([]byte, error) {
   return json.Marshal(&r.{{.TypeName}})
 }
@@ -34,6 +36,7 @@ func (r *{{.TypeName}}Resolver) MarshalJSON() ([]byte, error) {
 func (r *{{.TypeName}}Resolver) UnmarshalJSON(data []byte) error {
   return json.Unmarshal(data, &r.{{.TypeName}})
 }
+{{end}}
 {{end}}
 
 {{if eq .Kind "INTERFACE"}}
@@ -86,5 +89,11 @@ const (
 // {{.TypeName}} {{.TypeDescription}}
 type {{.TypeName}} struct {
   {{range .InputFields}}{{.}}{{end}}
+}
+{{end}}
+
+{{if eq .Kind "RESOLVER"}}
+// {{.TypeName}} {{.TypeDescription}}
+type {{.TypeName}} struct {
 }
 {{end}}

@@ -1,8 +1,15 @@
+{{ define "arguments" }}args *struct{
+  {{range .}}{{.Name | capitalize}} {{.Type}}
+  {{end}}
+}{{ end }}
+{{define "receiver"}}{{if is_entry . }}Resolver{{else}}{{.}}Resolver{{end}}{{end}}
 {{if eq .TypeKind "OBJECT"}}
-func (r *{{.TypeName}}Resolver) {{capitalize .MethodName}}() {{.MethodReturnType}} {
-  return r.{{.TypeName}}.{{capitalize .MethodReturn}}
+{{$hasArguments := gt (.MethodArguments | len) 0}}
+func (r *{{template "receiver" .TypeName}}) {{capitalize .MethodName}}({{if $hasArguments}}{{template "arguments" .MethodArguments}}{{end}}) {{.MethodReturnType}} {
+  {{if is_entry .TypeName}}return nil{{else}}return r.{{.TypeName}}.{{capitalize .MethodReturn}}{{end}}
 }
 {{end}}
 {{if eq .TypeKind "INTERFACE"}}
-{{capitalize .MethodName}}() {{.MethodReturnType}}
+{{$hasArguments := gt (.MethodArguments | len) 0}}
+{{capitalize .MethodName}}({{if $hasArguments}}{{template "arguments" .MethodArguments}}{{end}}) {{.MethodReturnType}}
 {{end}}
