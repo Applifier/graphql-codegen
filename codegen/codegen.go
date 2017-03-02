@@ -86,12 +86,12 @@ func Generate(graphSchema string, conf config.Config) (map[string]string, error)
 		var code string
 		switch qlType.Kind() {
 		default:
-			log.Printf("%s not supported yet", qlType.Kind())
-		case "OBJECT":
 			code, err = generateType(qlType, conf)
 			if err != nil {
 				return nil, err
 			}
+		case "ENUM", "INPUT_OBJECT", "UNION":
+			log.Printf("%s not supported yet", qlType.Kind())
 		}
 
 		results[fileName] = code
@@ -145,7 +145,17 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 			imports = append(imports, fieldImports...)
 		}
 
+		possibleTypes := []string{}
+
+		if tp.PossibleTypes() != nil {
+			for _, tp := range *tp.PossibleTypes() {
+				possibleTypes = append(possibleTypes, *tp.Name())
+			}
+		}
+
 		tmpl.Execute(buf, map[string]interface{}{
+			"Kind":            tp.Kind(),
+			"PossibleTypes":   possibleTypes,
 			"TypeName":        name,
 			"TypeDescription": returnString(tp.Description()),
 			"Config":          conf,
@@ -186,6 +196,7 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 		fieldTypeName := getTypeName(fp.Type(), conf)
 
 		tmpl.Execute(fieldCode, map[string]interface{}{
+			"TypeKind":         tp.Kind(),
 			"FieldName":        name,
 			"FieldDescription": fp.Description(),
 			"FieldType":        fieldTypeName,
@@ -199,6 +210,7 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 		}
 
 		tmpl.Execute(methodCode, map[string]interface{}{
+			"TypeKind":         tp.Kind(),
 			"TypeName":         typeName,
 			"MethodName":       name,
 			"MethodReturnType": fieldTypeName,

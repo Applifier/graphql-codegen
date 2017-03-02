@@ -3,13 +3,17 @@
 
 package {{.Config.Package}};
 
+
 import (
+{{if eq .Kind "OBJECT"}}
   "encoding/json"
+{{end}}
   {{range .Imports}}
     {{.}}
   {{end}}
 )
 
+{{if eq .Kind "OBJECT"}}
 // {{.TypeName}} {{.TypeDescription}}
 type {{.TypeName}} struct {
   {{range .Fields}}{{.}}{{end}}
@@ -30,3 +34,24 @@ func (r *{{.TypeName}}Resolver) MarshalJSON() ([]byte, error) {
 func (r *{{.TypeName}}Resolver) UnmarshalJSON(data []byte) error {
   return json.Unmarshal(data, &r.{{.TypeName}})
 }
+{{end}}
+{{if eq .Kind "INTERFACE"}}
+// {{.TypeName}} {{.TypeDescription}}
+type {{.TypeName}} interface {
+  {{range .Methods}}{{.}}{{end}}
+}
+
+// {{.TypeName}}Resolver resolver for {{.TypeName}}
+type {{.TypeName}}Resolver struct {
+  {{.TypeName}}
+}
+{{ $typeName := .TypeName }}
+{{range $possibleType := .PossibleTypes}}
+  func (r *{{$typeName}}Resolver) To{{$possibleType}}() (*{{$possibleType}}Resolver, bool) {
+    c, ok := r.{{$typeName}}.(*{{$possibleType}}Resolver)
+	   return c, ok
+  }
+{{end}}
+
+
+{{end}}

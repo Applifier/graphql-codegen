@@ -1,3 +1,8 @@
+{{if eq .TypeKind "OBJECT"}}
 func (r *{{.TypeName}}Resolver) {{capitalize .MethodName}}() {{.MethodReturnType}} {
   return r.{{.TypeName}}.{{capitalize .MethodReturn}}
 }
+{{end}}
+{{if eq .TypeKind "INTERFACE"}}
+{{capitalize .MethodName}}() {{.MethodReturnType}}
+{{end}}
