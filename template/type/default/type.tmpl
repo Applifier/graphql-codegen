@@ -70,3 +70,13 @@ type {{.TypeName}}Resolver struct {
 {{end}}
 
 {{end}}
+
+{{if eq .Kind "ENUM"}}
+{{ $typeName := .TypeName }}
+type {{$typeName}} string
+const (
+{{range $value := .EnumValues}}
+  {{$typeName}}{{$value}} = {{$typeName}}("{{$value}}")
+{{end}}
+)
+{{end}}
