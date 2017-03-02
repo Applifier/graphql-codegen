@@ -84,14 +84,9 @@ func Generate(graphSchema string, conf config.Config) (map[string]string, error)
 		log.Printf("Generating Go code for %s %s", qlType.Kind(), name)
 
 		var code string
-		switch qlType.Kind() {
-		default:
-			code, err = generateType(qlType, conf)
-			if err != nil {
-				return nil, err
-			}
-		case "INPUT_OBJECT":
-			log.Printf("%s not supported yet", qlType.Kind())
+		code, err = generateType(qlType, conf)
+		if err != nil {
+			return nil, err
 		}
 
 		results[fileName] = code
@@ -149,6 +144,18 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 			imports = append(imports, fieldImports...)
 		}
 
+		var inputFields []string
+		if tp.InputFields() != nil {
+			for _, ip := range *tp.InputFields() {
+				inputField, inputFieldImports, err := generateInputValue(ip, tp, typeConf, conf)
+				if err != nil {
+					return "", err
+				}
+				imports = append(imports, inputFieldImports...)
+				inputFields = append(inputFields, inputField)
+			}
+		}
+
 		possibleTypes := []string{}
 
 		if tp.PossibleTypes() != nil {
@@ -172,6 +179,7 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 			"TypeDescription": returnString(tp.Description()),
 			"Config":          conf,
 			"Fields":          fields,
+			"InputFields":     inputFields,
 			"Methods":         methods,
 			"Imports":         removeDuplicates(imports),
 		})
@@ -179,6 +187,62 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 	//println(string(buf.Bytes()))
 	b, err := FormatCode(string(buf.Bytes()))
 	return string(b), err
+}
+
+func generateInputValue(ip *introspection.InputValue, tp *introspection.Type, typeConf config.TypeConfig, conf config.Config) (string, []string, error) {
+	name := ip.Name()
+	typeName := *tp.Name()
+	propConf := typeConf.Field[name]
+	fieldCode := &bytes.Buffer{}
+	methodCode := &bytes.Buffer{}
+	imports := []string{}
+
+	if len(propConf.Template) == 0 {
+		propConf.Template = map[string]map[string]interface{}{}
+		propConf.Template["default"] = map[string]interface{}{}
+	}
+
+	for templateName, templateConfig := range propConf.Template {
+		propTemplate, err := codegenTemplate.GetPropertyTemplate(templateName)
+		if err != nil {
+			return "", nil, err
+		}
+
+		tmpl, err := template.New(templateName).Funcs(templateFunMap).Parse(strings.Trim(propTemplate.FieldTemplate, " \t"))
+		if err != nil {
+			return "", nil, err
+		}
+
+		fieldTypeName := getTypeName(ip.Type(), conf)
+
+		tmpl.Execute(fieldCode, map[string]interface{}{
+			"TypeKind":         tp.Kind(),
+			"FieldName":        name,
+			"FieldDescription": returnString(ip.Description()),
+			"FieldType":        fieldTypeName,
+			"Config":           conf,
+			"TemplateConfig":   templateConfig,
+		})
+
+		tmpl, err = template.New(templateName).Funcs(templateFunMap).Parse(propTemplate.MethodTemplate)
+		if err != nil {
+			return "", nil, err
+		}
+
+		tmpl.Execute(methodCode, map[string]interface{}{
+			"TypeKind":         tp.Kind(),
+			"TypeName":         typeName,
+			"MethodName":       name,
+			"MethodReturnType": fieldTypeName,
+			"MethodReturn":     name,
+			"Config":           conf,
+			"TemplateConfig":   templateConfig,
+		})
+
+		imports = append(imports, getImports(ip.Type(), conf)...)
+	}
+
+	return string(fieldCode.Bytes()), imports, nil
 }
 
 func generateField(fp *introspection.Field, tp *introspection.Type, typeConf config.TypeConfig, conf config.Config) (string, string, []string, error) {

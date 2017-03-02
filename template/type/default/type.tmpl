@@ -85,6 +85,6 @@ const (
 {{if eq .Kind "INPUT_OBJECT"}}
 // {{.TypeName}} {{.TypeDescription}}
 type {{.TypeName}} struct {
-  {{range .Fields}}{{.}}{{end}}
+  {{range .InputFields}}{{.}}{{end}}
 }
 {{end}}
