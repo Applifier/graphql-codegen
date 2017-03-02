@@ -9,7 +9,9 @@ import (
 
 // Review Represents a review for a movie
 type Review struct {
-	Stars      int32   `json:"stars"`
+	// Stars The number of stars this review gave, 1-5
+	Stars int32 `json:"stars"`
+	// Commentary Comment about the movie
 	Commentary *string `json:"commentary"`
 }
 
@@ -18,10 +20,12 @@ type ReviewResolver struct {
 	Review
 }
 
+// Stars The number of stars this review gave, 1-5
 func (r *ReviewResolver) Stars() int32 {
 	return r.Review.Stars
 }
 
+// Commentary Comment about the movie
 func (r *ReviewResolver) Commentary() *string {
 	return r.Review.Commentary
 }

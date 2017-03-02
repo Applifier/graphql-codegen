@@ -11,9 +11,12 @@ import (
 
 // BarFoo
 type BarFoo struct {
+	// StartCursor <nil>
 	StartCursor *graphql.ID `json:"startCursor"`
-	EndCursor   *graphql.ID `json:"endCursor"`
-	HasNextPage bool        `json:"hasNextPage"`
+	// EndCursor <nil>
+	EndCursor *graphql.ID `json:"endCursor"`
+	// HasNextPage <nil>
+	HasNextPage bool `json:"hasNextPage"`
 }
 
 // BarFooResolver resolver for BarFoo
@@ -21,14 +24,17 @@ type BarFooResolver struct {
 	BarFoo
 }
 
+// StartCursor <nil>
 func (r *BarFooResolver) StartCursor() *graphql.ID {
 	return r.BarFoo.StartCursor
 }
 
+// EndCursor <nil>
 func (r *BarFooResolver) EndCursor() *graphql.ID {
 	return r.BarFoo.EndCursor
 }
 
+// HasNextPage <nil>
 func (r *BarFooResolver) HasNextPage() bool {
 	return r.BarFoo.HasNextPage
 }

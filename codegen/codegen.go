@@ -231,10 +231,8 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 
 func generateInputValue(ip *introspection.InputValue, tp *introspection.Type, typeConf config.TypeConfig, conf config.Config) (string, []string, error) {
 	name := ip.Name()
-	typeName := *tp.Name()
 	propConf := typeConf.Field[name]
 	fieldCode := &bytes.Buffer{}
-	methodCode := &bytes.Buffer{}
 	imports := []string{}
 
 	if len(propConf.Template) == 0 {
@@ -258,23 +256,8 @@ func generateInputValue(ip *introspection.InputValue, tp *introspection.Type, ty
 		tmpl.Execute(fieldCode, map[string]interface{}{
 			"TypeKind":         tp.Kind(),
 			"FieldName":        name,
-			"FieldDescription": returnString(ip.Description()),
+			"FieldDescription": ip.Description(),
 			"FieldType":        fieldTypeName,
-			"Config":           conf,
-			"TemplateConfig":   templateConfig,
-		})
-
-		tmpl, err = template.New(templateName).Funcs(templateFunMap).Parse(propTemplate.MethodTemplate)
-		if err != nil {
-			return "", nil, err
-		}
-
-		tmpl.Execute(methodCode, map[string]interface{}{
-			"TypeKind":         tp.Kind(),
-			"TypeName":         typeName,
-			"MethodName":       name,
-			"MethodReturnType": fieldTypeName,
-			"MethodReturn":     name,
 			"Config":           conf,
 			"TemplateConfig":   templateConfig,
 		})
@@ -340,14 +323,15 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 		}
 
 		tmpl.Execute(methodCode, map[string]interface{}{
-			"TypeKind":         tp.Kind(),
-			"TypeName":         typeName,
-			"MethodArguments":  fieldArguments,
-			"MethodName":       name,
-			"MethodReturnType": fieldTypeName,
-			"MethodReturn":     name,
-			"Config":           conf,
-			"TemplateConfig":   templateConfig,
+			"TypeKind":          tp.Kind(),
+			"TypeName":          typeName,
+			"MethodArguments":   fieldArguments,
+			"MethodDescription": fp.Description(),
+			"MethodName":        name,
+			"MethodReturnType":  fieldTypeName,
+			"MethodReturn":      name,
+			"Config":            conf,
+			"TemplateConfig":    templateConfig,
 		})
 
 		imports = append(imports, getImports(fp.Type(), conf)...)

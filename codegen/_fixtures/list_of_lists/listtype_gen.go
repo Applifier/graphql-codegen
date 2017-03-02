@@ -9,9 +9,12 @@ import (
 
 // ListType Information for paginating this connection
 type ListType struct {
-	List              *[]*string    `json:"list"`
-	ListOfList        *[]*[]*string `json:"listOfList"`
-	NonNullListOfList [][]string    `json:"nonNullListOfList"`
+	// List <nil>
+	List *[]*string `json:"list"`
+	// ListOfList <nil>
+	ListOfList *[]*[]*string `json:"listOfList"`
+	// NonNullListOfList <nil>
+	NonNullListOfList [][]string `json:"nonNullListOfList"`
 }
 
 // ListTypeResolver resolver for ListType
@@ -19,14 +22,17 @@ type ListTypeResolver struct {
 	ListType
 }
 
+// List <nil>
 func (r *ListTypeResolver) List() *[]*string {
 	return r.ListType.List
 }
 
+// ListOfList <nil>
 func (r *ListTypeResolver) ListOfList() *[]*[]*string {
 	return r.ListType.ListOfList
 }
 
+// NonNullListOfList <nil>
 func (r *ListTypeResolver) NonNullListOfList() [][]string {
 	return r.ListType.NonNullListOfList
 }

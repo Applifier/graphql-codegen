@@ -9,6 +9,7 @@ import (
 
 // FooBar
 type FooBar struct {
+	// BarFoo <nil>
 	BarFoo *BarFooResolver `json:"barFoo"`
 }
 
@@ -17,6 +18,7 @@ type FooBarResolver struct {
 	FooBar
 }
 
+// BarFoo <nil>
 func (r *FooBarResolver) BarFoo() *BarFooResolver {
 	return r.FooBar.BarFoo
 }
