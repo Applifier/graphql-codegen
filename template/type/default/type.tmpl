@@ -73,10 +73,18 @@ type {{.TypeName}}Resolver struct {
 
 {{if eq .Kind "ENUM"}}
 {{ $typeName := .TypeName }}
+// {{.TypeName}} {{.TypeDescription}}
 type {{$typeName}} string
 const (
 {{range $value := .EnumValues}}
   {{$typeName}}{{$value}} = {{$typeName}}("{{$value}}")
 {{end}}
 )
+{{end}}
+
+{{if eq .Kind "INPUT_OBJECT"}}
+// {{.TypeName}} {{.TypeDescription}}
+type {{.TypeName}} struct {
+  {{range .Fields}}{{.}}{{end}}
+}
 {{end}}
