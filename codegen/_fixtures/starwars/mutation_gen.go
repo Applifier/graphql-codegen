@@ -3,7 +3,7 @@
 
 package starwars
 
-// CreateReview <nil>
+// CreateReview
 func (r *Resolver) CreateReview(args *struct {
 	Episode Episode
 	Review  *ReviewInput

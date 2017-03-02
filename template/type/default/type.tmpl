@@ -99,3 +99,21 @@ type {{.TypeName}} struct {
 type {{.TypeName}} struct {
 }
 {{end}}
+
+{{if eq .Kind "SCALAR"}}
+// {{.TypeName}}Resolver {{.TypeDescription}}
+type {{.TypeName}}Resolver struct {
+  value interface{}
+}
+
+func (r *{{.TypeName}}Resolver) ImplementsGraphQLType(name string) bool {
+    return false
+}
+
+func (r *{{.TypeName}}Resolver) UnmarshalGraphQL(input interface{}) error {
+  // Scalars need to be implemented manually
+  r.value = input
+  return nil
+}
+
+{{end}}

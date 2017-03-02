@@ -11,11 +11,11 @@ import (
 
 // PageInfo Information for paginating this connection
 type PageInfo struct {
-	// StartCursor <nil>
+	// StartCursor
 	StartCursor *graphql.ID `json:"startCursor"`
-	// EndCursor <nil>
+	// EndCursor
 	EndCursor *graphql.ID `json:"endCursor"`
-	// HasNextPage <nil>
+	// HasNextPage
 	HasNextPage bool `json:"hasNextPage"`
 }
 
@@ -24,17 +24,17 @@ type PageInfoResolver struct {
 	PageInfo
 }
 
-// StartCursor <nil>
+// StartCursor
 func (r *PageInfoResolver) StartCursor() *graphql.ID {
 	return r.PageInfo.StartCursor
 }
 
-// EndCursor <nil>
+// EndCursor
 func (r *PageInfoResolver) EndCursor() *graphql.ID {
 	return r.PageInfo.EndCursor
 }
 
-// HasNextPage <nil>
+// HasNextPage
 func (r *PageInfoResolver) HasNextPage() bool {
 	return r.PageInfo.HasNextPage
 }

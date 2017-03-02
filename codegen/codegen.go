@@ -54,9 +54,10 @@ var (
 	}
 
 	templateFunMap = template.FuncMap{
-		"capitalize":   capitalise,
-		"uncapitalize": unCapitalise,
-		"is_entry":     isEntryPoint,
+		"capitalize":         capitalise,
+		"uncapitalize":       unCapitalise,
+		"is_entry":           isEntryPoint,
+		"remove_line_breaks": removeLineBreaks,
 	}
 )
 
@@ -216,7 +217,7 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 			"PossibleTypes":   possibleTypes,
 			"EnumValues":      enumValues,
 			"TypeName":        name,
-			"TypeDescription": returnString(tp.Description()),
+			"TypeDescription": removeLineBreaks(returnString(tp.Description())),
 			"Config":          conf,
 			"Fields":          fields,
 			"InputFields":     inputFields,
@@ -256,7 +257,7 @@ func generateInputValue(ip *introspection.InputValue, tp *introspection.Type, ty
 		tmpl.Execute(fieldCode, map[string]interface{}{
 			"TypeKind":         tp.Kind(),
 			"FieldName":        name,
-			"FieldDescription": ip.Description(),
+			"FieldDescription": removeLineBreaks(returnString(ip.Description())),
 			"FieldType":        fieldTypeName,
 			"Config":           conf,
 			"TemplateConfig":   templateConfig,
@@ -311,7 +312,7 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 		tmpl.Execute(fieldCode, map[string]interface{}{
 			"TypeKind":         tp.Kind(),
 			"FieldName":        name,
-			"FieldDescription": fp.Description(),
+			"FieldDescription": removeLineBreaks(returnString(fp.Description())),
 			"FieldType":        fieldTypeName,
 			"Config":           conf,
 			"TemplateConfig":   templateConfig,
@@ -326,7 +327,7 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 			"TypeKind":          tp.Kind(),
 			"TypeName":          typeName,
 			"MethodArguments":   fieldArguments,
-			"MethodDescription": fp.Description(),
+			"MethodDescription": removeLineBreaks(returnString(fp.Description())),
 			"MethodName":        name,
 			"MethodReturnType":  fieldTypeName,
 			"MethodReturn":      name,
@@ -410,6 +411,10 @@ func removeDuplicates(a []string) []string {
 
 func isEntryPoint(a string) bool {
 	return a == "Mutation" || a == "Query"
+}
+
+func removeLineBreaks(a string) string {
+	return strings.Replace(a, "\n", " ", -1)
 }
 
 func capitalise(str string) string {

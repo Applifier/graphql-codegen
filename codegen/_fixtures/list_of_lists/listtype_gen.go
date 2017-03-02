@@ -9,11 +9,11 @@ import (
 
 // ListType Information for paginating this connection
 type ListType struct {
-	// List <nil>
+	// List
 	List *[]*string `json:"list"`
-	// ListOfList <nil>
+	// ListOfList
 	ListOfList *[]*[]*string `json:"listOfList"`
-	// NonNullListOfList <nil>
+	// NonNullListOfList
 	NonNullListOfList [][]string `json:"nonNullListOfList"`
 }
 
@@ -22,17 +22,17 @@ type ListTypeResolver struct {
 	ListType
 }
 
-// List <nil>
+// List
 func (r *ListTypeResolver) List() *[]*string {
 	return r.ListType.List
 }
 
-// ListOfList <nil>
+// ListOfList
 func (r *ListTypeResolver) ListOfList() *[]*[]*string {
 	return r.ListType.ListOfList
 }
 
-// NonNullListOfList <nil>
+// NonNullListOfList
 func (r *ListTypeResolver) NonNullListOfList() [][]string {
 	return r.ListType.NonNullListOfList
 }
