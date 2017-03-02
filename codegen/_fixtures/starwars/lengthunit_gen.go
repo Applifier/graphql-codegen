@@ -7,7 +7,10 @@ package starwars
 type LengthUnit string
 
 const (
+
+	// LengthUnitMETER Units of height
 	LengthUnitMETER = LengthUnit("METER")
 
+	// LengthUnitFOOT Units of height
 	LengthUnitFOOT = LengthUnit("FOOT")
 )
