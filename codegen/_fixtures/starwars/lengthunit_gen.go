@@ -3,6 +3,7 @@
 
 package starwars
 
+// LengthUnit Units of height
 type LengthUnit string
 
 const (
