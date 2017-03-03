@@ -9,6 +9,7 @@ import (
 func RunTest(schema string, conf config.Config, expected map[string]string, t *testing.T) map[string]string {
 	fileMap, err := Generate(schema, conf)
 	if err != nil {
+		t.Log("Schema parsing failed")
 		t.Fatal(err)
 	}
 

@@ -1,0 +1,31 @@
+type User {
+  id: ID!
+  username: String!
+  avatar_url: String!
+}
+
+type Conversation {
+  id: ID!
+  with_user: User!
+  messages: [Message!]!
+}
+
+type Message {
+  id: ID!
+  conversation: Conversation!
+  # user blalala
+  from: User!
+  # dasadssadsad
+  body: String!
+  created_at: String!
+}
+
+type Query {
+  user(id: ID!): User
+  conversation(id: ID!): Conversation
+  conversations: [Conversation!]!
+}
+
+schema {
+	query: Query
+}

@@ -1,0 +1,18 @@
+{{ define "arguments" }}args *struct{
+  {{range .}}{{.Name | capitalize}} {{.Type}}
+  {{end}}
+}{{ end }}
+{{define "receiver"}}{{if is_entry . }}Resolver{{else}}{{.}}Resolver{{end}}{{end}}
+{{$hasArguments := gt (.MethodArguments | len) 0}}
+// {{capitalize .MethodName}} {{.MethodDescription}}
+func (r *{{template "receiver" .TypeName}}) {{capitalize .MethodName}}({{if $hasArguments}}{{template "arguments" .MethodArguments}}{{end}}) ({{.MethodReturnType}}, error) {
+  var result {{.MethodReturnType}}
+  resp, err := http.Get({{sub_template .TemplateConfig.url .}})
+  if err != nil {
+  	return nil, err
+  }
+  defer resp.Body.Close()
+
+  err = json.NewDecoder(resp.Body).Decode(&result)
+  return result, err
+}

@@ -170,7 +170,7 @@ func propertyHttp_resolverFieldTmpl() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "property/http_resolver/field.tmpl", size: 111, mode: os.FileMode(420), modTime: time.Unix(1488540661, 0)}
+	info := bindataFileInfo{name: "property/http_resolver/field.tmpl", size: 111, mode: os.FileMode(420), modTime: time.Unix(1488552731, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

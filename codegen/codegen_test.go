@@ -34,7 +34,10 @@ func TestCodegen(t *testing.T) {
 			}
 		}
 
-		cfg, _ := config.Parse(string(confBytes))
+		cfg, err := config.Parse(string(confBytes))
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		fileMap := RunTest(string(schemaBytes), cfg, exectedFilesMap, t)
 		if os.Getenv("RECORD_FIXTURES") == "yes" {
