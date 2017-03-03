@@ -52,17 +52,37 @@ var (
 			"",
 		},
 	}
-
-	templateFunMap template.FuncMap
 )
 
-func Generate(graphSchema string, conf config.Config) (map[string]string, error) {
+type CodeGen struct {
+	graphSchema  string
+	conf         config.Config
+	mutationName string
+	queryName    string
+}
+
+func NewCodeGen(graphSchema string, conf config.Config) *CodeGen {
+	return &CodeGen{graphSchema, conf, "", ""}
+}
+
+func (g *CodeGen) Generate() (map[string]string, error) {
+	graphSchema := g.graphSchema
+	conf := g.conf
+
 	sch, err := graphql.ParseSchema(graphSchema, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	ins := sch.Inspect()
+
+	if ins.MutationType() != nil {
+		g.mutationName = g.returnString(ins.MutationType().Name())
+	}
+
+	if ins.QueryType() != nil {
+		g.queryName = g.returnString(ins.QueryType().Name())
+	}
 
 	results := map[string]string{}
 
@@ -78,7 +98,7 @@ func Generate(graphSchema string, conf config.Config) (map[string]string, error)
 			continue
 		}
 
-		if isEntryPoint(name) {
+		if g.isEntryPoint(name) {
 			entryPoint = true
 		}
 
@@ -87,7 +107,7 @@ func Generate(graphSchema string, conf config.Config) (map[string]string, error)
 		log.Printf("Generating Go code for %s %s", qlType.Kind(), name)
 
 		var code string
-		code, err = generateType(qlType, conf)
+		code, err = g.generateType(qlType, conf)
 		if err != nil {
 			return nil, err
 		}
@@ -97,7 +117,7 @@ func Generate(graphSchema string, conf config.Config) (map[string]string, error)
 
 	// Generate entry point
 	if entryPoint {
-		entry, err := generateEntryPoint(conf)
+		entry, err := g.generateEntryPoint(conf)
 		if err != nil {
 			return nil, err
 		}
@@ -107,21 +127,21 @@ func Generate(graphSchema string, conf config.Config) (map[string]string, error)
 	return results, nil
 }
 
-func returnString(strPtr *string) string {
+func (g *CodeGen) returnString(strPtr *string) string {
 	if strPtr != nil {
 		return *strPtr
 	}
 	return ""
 }
 
-func generateEntryPoint(conf config.Config) (string, error) {
+func (g *CodeGen) generateEntryPoint(conf config.Config) (string, error) {
 	// TODO figure out if this needs to be configurable
 	typeTemplate, err := codegenTemplate.GetTypeTemplate("default")
 	if err != nil {
 		return "", err
 	}
 
-	tmpl, err := template.New("default").Funcs(templateFunMap).Parse(strings.Trim(typeTemplate.TypeTemplate, " \t"))
+	tmpl, err := template.New("default").Funcs(g.templateFuncMap()).Parse(strings.Trim(typeTemplate.TypeTemplate, " \t"))
 	if err != nil {
 		return "", err
 	}
@@ -138,7 +158,7 @@ func generateEntryPoint(conf config.Config) (string, error) {
 	return string(b), err
 }
 
-func generateType(tp *introspection.Type, conf config.Config) (code string, err error) {
+func (g *CodeGen) generateType(tp *introspection.Type, conf config.Config) (code string, err error) {
 	name := *tp.Name()
 	typeConf := conf.Type[name]
 
@@ -155,12 +175,12 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 			return "", err
 		}
 
-		tmpl, err := template.New(templateName).Funcs(templateFunMap).Parse(strings.Trim(typeTemplate.TypeTemplate, " \t"))
+		tmpl, err := template.New(templateName).Funcs(g.templateFuncMap()).Parse(strings.Trim(typeTemplate.TypeTemplate, " \t"))
 		if err != nil {
 			return "", err
 		}
 
-		// Move this to a util func
+		// Move this to a util func (g *CodeGen)
 		var ifields []*introspection.Field
 		if tp.Fields(&struct{ IncludeDeprecated bool }{true}) != nil {
 			ifields = *tp.Fields(&struct{ IncludeDeprecated bool }{true})
@@ -170,7 +190,7 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 		methods := make([]string, len(ifields))
 		imports := []string{}
 		for i, fp := range ifields {
-			fieldCode, methodCode, fieldImports, err := generateField(fp, tp, typeConf, conf)
+			fieldCode, methodCode, fieldImports, err := g.generateField(fp, tp, typeConf, conf)
 			if err != nil {
 				return "", err
 			}
@@ -183,7 +203,7 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 		var inputFields []string
 		if tp.InputFields() != nil {
 			for _, ip := range *tp.InputFields() {
-				inputField, inputFieldImports, err := generateInputValue(ip, tp, typeConf, conf)
+				inputField, inputFieldImports, err := g.generateInputValue(ip, tp, typeConf, conf)
 				if err != nil {
 					return "", err
 				}
@@ -221,12 +241,12 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 			"PossibleTypes":   possibleTypes,
 			"EnumValues":      enumValues,
 			"TypeName":        name,
-			"TypeDescription": removeLineBreaks(returnString(tp.Description())),
+			"TypeDescription": g.removeLineBreaks(g.returnString(tp.Description())),
 			"Config":          conf,
 			"Fields":          fields,
 			"InputFields":     inputFields,
 			"Methods":         methods,
-			"Imports":         removeDuplicates(imports),
+			"Imports":         g.removeDuplicates(imports),
 			"TemplateConfig":  templateConfig,
 		})
 	}
@@ -235,7 +255,7 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 	return string(b), err
 }
 
-func generateInputValue(ip *introspection.InputValue, tp *introspection.Type, typeConf config.TypeConfig, conf config.Config) (string, []string, error) {
+func (g *CodeGen) generateInputValue(ip *introspection.InputValue, tp *introspection.Type, typeConf config.TypeConfig, conf config.Config) (string, []string, error) {
 	name := ip.Name()
 	propConf := typeConf.Field[name]
 	fieldCode := &bytes.Buffer{}
@@ -252,23 +272,23 @@ func generateInputValue(ip *introspection.InputValue, tp *introspection.Type, ty
 			return "", nil, err
 		}
 
-		tmpl, err := template.New(templateName).Funcs(templateFunMap).Parse(strings.Trim(propTemplate.FieldTemplate, " \t"))
+		tmpl, err := template.New(templateName).Funcs(g.templateFuncMap()).Parse(strings.Trim(propTemplate.FieldTemplate, " \t"))
 		if err != nil {
 			return "", nil, err
 		}
 
-		fieldTypeName := getTypeName(ip.Type(), conf, false)
+		fieldTypeName := g.getTypeName(ip.Type(), conf, false)
 
 		tmpl.Execute(fieldCode, map[string]interface{}{
 			"TypeKind":         tp.Kind(),
 			"FieldName":        name,
-			"FieldDescription": removeLineBreaks(returnString(ip.Description())),
+			"FieldDescription": g.removeLineBreaks(g.returnString(ip.Description())),
 			"FieldType":        fieldTypeName,
 			"Config":           conf,
 			"TemplateConfig":   templateConfig,
 		})
 
-		imports = append(imports, getImports(ip.Type(), conf)...)
+		imports = append(imports, g.getImports(ip.Type(), conf)...)
 		imports = append(imports, propConf.Imports...)
 		imports = append(imports, propTemplate.Config.Imports...)
 		if val, ok := templateConfig["imports"]; ok {
@@ -281,7 +301,7 @@ func generateInputValue(ip *introspection.InputValue, tp *introspection.Type, ty
 	return string(fieldCode.Bytes()), imports, nil
 }
 
-func generateField(fp *introspection.Field, tp *introspection.Type, typeConf config.TypeConfig, conf config.Config) (string, string, []string, error) {
+func (g *CodeGen) generateField(fp *introspection.Field, tp *introspection.Type, typeConf config.TypeConfig, conf config.Config) (string, string, []string, error) {
 	name := fp.Name()
 	typeName := *tp.Name()
 	propConf := typeConf.Field[name]
@@ -300,12 +320,12 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 			return "", "", nil, err
 		}
 
-		tmpl, err := template.New(templateName).Funcs(templateFunMap).Parse(strings.Trim(propTemplate.FieldTemplate, " \t"))
+		tmpl, err := template.New(templateName).Funcs(g.templateFuncMap()).Parse(strings.Trim(propTemplate.FieldTemplate, " \t"))
 		if err != nil {
 			return "", "", nil, err
 		}
 
-		fieldTypeName := getTypeName(fp.Type(), conf, false)
+		fieldTypeName := g.getTypeName(fp.Type(), conf, false)
 
 		type fieldArgument struct {
 			Name string
@@ -316,21 +336,21 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 		for _, field := range fp.Args() {
 			fieldArguments = append(fieldArguments, fieldArgument{
 				Name: field.Name(),
-				Type: getTypeName(field.Type(), conf, true),
+				Type: g.getTypeName(field.Type(), conf, true),
 			})
-			imports = append(imports, getImports(field.Type(), conf)...)
+			imports = append(imports, g.getImports(field.Type(), conf)...)
 		}
 
 		tmpl.Execute(fieldCode, map[string]interface{}{
 			"TypeKind":         tp.Kind(),
 			"FieldName":        name,
-			"FieldDescription": removeLineBreaks(returnString(fp.Description())),
+			"FieldDescription": g.removeLineBreaks(g.returnString(fp.Description())),
 			"FieldType":        fieldTypeName,
 			"Config":           conf,
 			"TemplateConfig":   templateConfig,
 		})
 
-		tmpl, err = template.New(templateName).Funcs(templateFunMap).Parse(propTemplate.MethodTemplate)
+		tmpl, err = template.New(templateName).Funcs(g.templateFuncMap()).Parse(propTemplate.MethodTemplate)
 		if err != nil {
 			return "", "", nil, err
 		}
@@ -339,7 +359,7 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 			"TypeKind":          tp.Kind(),
 			"TypeName":          typeName,
 			"MethodArguments":   fieldArguments,
-			"MethodDescription": removeLineBreaks(returnString(fp.Description())),
+			"MethodDescription": g.removeLineBreaks(g.returnString(fp.Description())),
 			"MethodName":        name,
 			"MethodReturnType":  fieldTypeName,
 			"MethodReturn":      name,
@@ -347,7 +367,7 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 			"TemplateConfig":    templateConfig,
 		})
 
-		imports = append(imports, getImports(fp.Type(), conf)...)
+		imports = append(imports, g.getImports(fp.Type(), conf)...)
 		imports = append(imports, propTemplate.Config.Imports...)
 		imports = append(imports, propConf.Imports...)
 		if val, ok := templateConfig["imports"]; ok {
@@ -360,14 +380,14 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 	return string(fieldCode.Bytes()), string(methodCode.Bytes()), imports, nil
 }
 
-func getPointer(typeName string, fp *introspection.Field) string {
+func (g *CodeGen) getPointer(typeName string, fp *introspection.Field) string {
 	if fp.Type().Kind() == "NON_NULL" {
 		return typeName
 	}
 	return "*" + typeName
 }
 
-func getImports(tp *introspection.Type, conf config.Config) []string {
+func (g *CodeGen) getImports(tp *introspection.Type, conf config.Config) []string {
 	name := tp.Name()
 	if name != nil {
 		if val, ok := internalTypeConfig[*name]; ok {
@@ -376,13 +396,13 @@ func getImports(tp *introspection.Type, conf config.Config) []string {
 	}
 
 	if tp.OfType() != nil {
-		return getImports(tp.OfType(), conf)
+		return g.getImports(tp.OfType(), conf)
 	}
 
 	return []string{}
 }
 
-func getTypeName(tp *introspection.Type, conf config.Config, input bool) (typ string) {
+func (g *CodeGen) getTypeName(tp *introspection.Type, conf config.Config, input bool) (typ string) {
 check:
 	if tp.Kind() == "NON_NULL" {
 		tp = tp.OfType()
@@ -423,7 +443,7 @@ check:
 	return
 }
 
-func removeDuplicates(a []string) []string {
+func (g *CodeGen) removeDuplicates(a []string) []string {
 	result := []string{}
 	seen := map[string]string{}
 	for _, val := range a {
@@ -436,27 +456,27 @@ func removeDuplicates(a []string) []string {
 	return result
 }
 
-func isEntryPoint(a string) bool {
-	return a == "Mutation" || a == "Query"
+func (g *CodeGen) isEntryPoint(a string) bool {
+	return a == g.mutationName || a == g.queryName
 }
 
-func removeLineBreaks(a string) string {
+func (g *CodeGen) removeLineBreaks(a string) string {
 	return strings.Replace(a, "\n", " ", -1)
 }
 
-func capitalise(str string) string {
+func (g *CodeGen) capitalise(str string) string {
 	if strings.ToLower(str) == "id" {
 		return "ID"
 	}
 	return strings.ToUpper(string(str[0])) + str[1:]
 }
 
-func unCapitalise(str string) string {
+func (g *CodeGen) unCapitalise(str string) string {
 	return strings.ToLower(string(str[0])) + str[1:]
 }
 
-func subTemplate(str string, val interface{}) string {
-	tmpl, err := template.New("sub_template").Funcs(templateFunMap).Parse(str)
+func (g *CodeGen) subTemplate(str string, val interface{}) string {
+	tmpl, err := template.New("sub_template").Funcs(g.templateFuncMap()).Parse(str)
 	if err != nil {
 		panic(err)
 	}
@@ -467,7 +487,7 @@ func subTemplate(str string, val interface{}) string {
 	return string(buf.Bytes())
 }
 
-func includesString(strings []string, str string) bool {
+func (g *CodeGen) includesString(strings []string, str string) bool {
 	for _, val := range strings {
 		if val == str {
 			return true
@@ -477,14 +497,14 @@ func includesString(strings []string, str string) bool {
 	return false
 }
 
-func init() {
-	templateFunMap = template.FuncMap{
-		"capitalize":         capitalise,
-		"uncapitalize":       unCapitalise,
-		"is_entry":           isEntryPoint,
-		"remove_line_breaks": removeLineBreaks,
-		"sub_template":       subTemplate,
+func (g *CodeGen) templateFuncMap() template.FuncMap {
+	return template.FuncMap{
+		"capitalize":         g.capitalise,
+		"uncapitalize":       g.unCapitalise,
+		"is_entry":           g.isEntryPoint,
+		"remove_line_breaks": g.removeLineBreaks,
+		"sub_template":       g.subTemplate,
 		"sprintf":            fmt.Sprintf,
-		"includes_string":    includesString,
+		"includes_string":    g.includesString,
 	}
 }
