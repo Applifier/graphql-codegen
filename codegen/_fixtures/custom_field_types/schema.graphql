@@ -1,9 +1,0 @@
-type BarFoo {
-  startCursor: ID
-  endCursor: ID
-  hasNextPage: Boolean!
-}
-
-type FooBar {
-  barFoo: BarFoo
-}

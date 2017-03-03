@@ -53,12 +53,7 @@ var (
 		},
 	}
 
-	templateFunMap = template.FuncMap{
-		"capitalize":         capitalise,
-		"uncapitalize":       unCapitalise,
-		"is_entry":           isEntryPoint,
-		"remove_line_breaks": removeLineBreaks,
-	}
+	templateFunMap template.FuncMap
 )
 
 func Generate(graphSchema string, conf config.Config) (map[string]string, error) {
@@ -154,7 +149,7 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 		typeConf.Template["default"] = map[string]interface{}{}
 	}
 
-	for templateName, _ := range typeConf.Template {
+	for templateName, templateConfig := range typeConf.Template {
 		typeTemplate, err := codegenTemplate.GetTypeTemplate(templateName)
 		if err != nil {
 			return "", err
@@ -212,6 +207,15 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 			}
 		}
 
+		imports = append(imports, typeTemplate.Config.Imports...)
+		if val, ok := templateConfig["imports"]; ok {
+			if arr, ok := val.([]string); ok {
+				imports = append(imports, arr...)
+			}
+		}
+
+		imports = append(imports, typeConf.Imports...)
+
 		tmpl.Execute(buf, map[string]interface{}{
 			"Kind":            tp.Kind(),
 			"PossibleTypes":   possibleTypes,
@@ -223,6 +227,7 @@ func generateType(tp *introspection.Type, conf config.Config) (code string, err 
 			"InputFields":     inputFields,
 			"Methods":         methods,
 			"Imports":         removeDuplicates(imports),
+			"TemplateConfig":  templateConfig,
 		})
 	}
 	//println(string(buf.Bytes()))
@@ -264,6 +269,13 @@ func generateInputValue(ip *introspection.InputValue, tp *introspection.Type, ty
 		})
 
 		imports = append(imports, getImports(ip.Type(), conf)...)
+		imports = append(imports, propConf.Imports...)
+		imports = append(imports, propTemplate.Config.Imports...)
+		if val, ok := templateConfig["imports"]; ok {
+			if arr, ok := val.([]string); ok {
+				imports = append(imports, arr...)
+			}
+		}
 	}
 
 	return string(fieldCode.Bytes()), imports, nil
@@ -336,6 +348,13 @@ func generateField(fp *introspection.Field, tp *introspection.Type, typeConf con
 		})
 
 		imports = append(imports, getImports(fp.Type(), conf)...)
+		imports = append(imports, propTemplate.Config.Imports...)
+		imports = append(imports, propConf.Imports...)
+		if val, ok := templateConfig["imports"]; ok {
+			if arr, ok := val.([]string); ok {
+				imports = append(imports, arr...)
+			}
+		}
 	}
 
 	return string(fieldCode.Bytes()), string(methodCode.Bytes()), imports, nil
@@ -385,6 +404,13 @@ check:
 	if tp.Kind() == "ENUM" {
 		typ = typ + *name
 	} else if tp.Kind() != "INPUT_OBJECT" {
+		if len(typ) > 0 {
+			if typ[len(typ)-1] != '*' {
+				typ = typ + "*"
+			}
+		} else {
+			typ = "*"
+		}
 		typ = typ + *name + "Resolver"
 	} else {
 		typ = typ + *name
@@ -401,6 +427,7 @@ func removeDuplicates(a []string) []string {
 	result := []string{}
 	seen := map[string]string{}
 	for _, val := range a {
+		val = strings.TrimSpace(val)
 		if _, ok := seen[val]; !ok {
 			result = append(result, val)
 			seen[val] = val
@@ -426,4 +453,38 @@ func capitalise(str string) string {
 
 func unCapitalise(str string) string {
 	return strings.ToLower(string(str[0])) + str[1:]
+}
+
+func subTemplate(str string, val interface{}) string {
+	tmpl, err := template.New("sub_template").Funcs(templateFunMap).Parse(str)
+	if err != nil {
+		panic(err)
+	}
+
+	buf := &bytes.Buffer{}
+	tmpl.Execute(buf, val)
+
+	return string(buf.Bytes())
+}
+
+func includesString(strings []string, str string) bool {
+	for _, val := range strings {
+		if val == str {
+			return true
+		}
+	}
+
+	return false
+}
+
+func init() {
+	templateFunMap = template.FuncMap{
+		"capitalize":         capitalise,
+		"uncapitalize":       unCapitalise,
+		"is_entry":           isEntryPoint,
+		"remove_line_breaks": removeLineBreaks,
+		"sub_template":       subTemplate,
+		"sprintf":            fmt.Sprintf,
+		"includes_string":    includesString,
+	}
 }

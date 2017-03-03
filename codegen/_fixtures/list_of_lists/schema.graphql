@@ -1,6 +1,0 @@
-# Information for paginating this connection
-type ListType {
-  list: [String]
-  listOfList: [[String]]
-  nonNullListOfList: [[String!]!]!
-}

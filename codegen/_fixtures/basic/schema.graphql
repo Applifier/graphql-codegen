@@ -1,6 +1,0 @@
-# Information for paginating this connection
-type PageInfo {
-  startCursor: ID
-  endCursor: ID
-  hasNextPage: Boolean!
-}

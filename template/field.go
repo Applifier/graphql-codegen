@@ -10,8 +10,9 @@ import (
 //go:generate go-bindata -pkg template -ignore=\.go  -o assets.go ./...
 
 type PropertyTemplateConfig struct {
-	Field  string
-	Method string
+	Field   string
+	Method  string
+	Imports []string
 }
 
 type PropertyTemplate struct {

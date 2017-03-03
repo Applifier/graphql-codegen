@@ -10,7 +10,8 @@ import (
 //go:generate go-bindata -pkg template -ignore=\.go  -o assets.go ./...
 
 type TypeTemplateConfig struct {
-	Type string
+	Type    string
+	Imports []string
 }
 
 type TypeTemplate struct {

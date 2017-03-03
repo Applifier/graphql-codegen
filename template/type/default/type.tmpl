@@ -7,7 +7,7 @@ package {{.Config.Package}};
 import (
 {{if eq .Kind "OBJECT"}}
   {{if not (is_entry .TypeName) }}
-  "encoding/json"
+  {{if not (includes_string .Imports "\"encoding/json\"")}}"encoding/json"{{end}}
   {{end}}
 {{end}}
   {{range .Imports}}
