@@ -16,6 +16,8 @@ Example below generates code for [schema.graphql](https://github.com/Applifier/g
 graphql-codegen generate -s=codegen/fixtures/httpget/schema.graphql -c=codegen/fixtures/httpget/config.hcl -p=httpget -o=test_output/
 ```
 
+Example of the generated code (_gen.go files) can be found under [/codegen/fixtures/httpget](https://github.com/Applifier/graphql-codegen/tree/master/codegen/fixtures/httpget)
+
 - More examples under [codegen/fixtures](https://github.com/Applifier/graphql-codegen/tree/master/codegen/fixtures)
 
 ## templates
