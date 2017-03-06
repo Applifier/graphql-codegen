@@ -15,3 +15,5 @@ Example below generates code for [schema.graphql](https://github.com/Applifier/g
 ```sh
 graphql-codegen generate -s=codegen/fixtures/httpget/schema.graphql -c=codegen/fixtures/httpget/config.hcl -p=httpget -o=test_output/
 ```
+
+- More examples under [codegen/fixtures](https://github.com/Applifier/graphql-codegen/tree/master/codegen/fixtures)
