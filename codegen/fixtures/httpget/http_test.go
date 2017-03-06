@@ -102,6 +102,7 @@ func TestHTTPSchema(t *testing.T) {
 				{
 					conversation(id: "1") {
             id,
+						title,
 						with_user {
 							id,
 							username,
@@ -121,6 +122,7 @@ func TestHTTPSchema(t *testing.T) {
 			{
 			 "conversation":{
 					"id":"1",
+					"title": "Conversation between you and Amy",
 					"messages":[
 						 {
 								"body":"Moi!",

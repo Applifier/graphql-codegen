@@ -8,6 +8,7 @@ type Conversation {
   id: ID!
   with_user: User!
   messages: [Message!]!
+  title: String!
 }
 
 type Message {

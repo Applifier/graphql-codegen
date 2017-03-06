@@ -1,0 +1,3 @@
+{{range .TemplateConfig.fields}}
+  {{capitalize .field_name}} {{.field_type}} `json:"{{.field_name}}"`
+{{end}}

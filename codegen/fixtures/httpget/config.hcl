@@ -32,6 +32,9 @@ type "Message" {
 }
 
 type "Conversation" {
+  field "title" {
+    template "custom" {}
+  }
   field "with_user" {
     imports = ["\"fmt\""]
     template "http_resolver" {
