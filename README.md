@@ -23,10 +23,10 @@ graphql-codegen generate -s=codegen/fixtures/httpget/schema.graphql -c=codegen/f
 ### default
 Resolve field based on a struct property with the same name as the schema type field
 
-Check example [config](https://github.com/Applifier/graphql-codegen/blob/master/codegen/fixtures/httpget/config.hcl#L35) and [conversation.go](https://github.com/Applifier/graphql-codegen/blob/master/codegen/fixtures/httpget/coversation.go#L12)
-
 ### custom
 Skips code generation for the field
+
+Check example [config](https://github.com/Applifier/graphql-codegen/blob/master/codegen/fixtures/httpget/config.hcl#L35) and [conversation.go](https://github.com/Applifier/graphql-codegen/blob/master/codegen/fixtures/httpget/coversation.go#L12)
 
 ### http_resolver
 Resolve field with a http GET request to a server
