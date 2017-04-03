@@ -8,6 +8,9 @@ This tool generates boilerplate code for [graphql-go](https://github.com/neelanc
 go install github.com/Applifier/graphql-codegen
 ```
 
+## TODO
+- [ ] Allow custom templates (without rebuilding)
+
 ## example
 
 Example below generates code for [schema.graphql](https://github.com/Applifier/graphql-codegen/blob/master/codegen/fixtures/httpget/schema.graphql). Optional config [config.hcl](https://github.com/Applifier/graphql-codegen/blob/master/codegen/fixtures/httpget/config.hcl) file is provided to tell the codegen where and how to fetch the data for the resolvers.
