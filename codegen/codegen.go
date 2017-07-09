@@ -428,8 +428,6 @@ check:
 			if typ[len(typ)-1] != '*' {
 				typ = typ + "*"
 			}
-		} else {
-			typ = "*"
 		}
 		typ = typ + *name + "Resolver"
 	} else {
