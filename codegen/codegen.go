@@ -428,7 +428,7 @@ check:
 			if typ[len(typ)-1] != '*' {
 				typ = typ + "*"
 			}
-		} else {
+		} else if tp.Kind() != "SCALAR" {
 			typ = "*"
 		}
 		typ = typ + *name + "Resolver"
