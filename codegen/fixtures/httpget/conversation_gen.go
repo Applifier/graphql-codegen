@@ -4,7 +4,7 @@
 package httpget
 
 import (
-	graphql "github.com/neelance/graphql-go"
+	graphql "github.com/graph-gophers/graphql-go"
 
 	"net/http"
 

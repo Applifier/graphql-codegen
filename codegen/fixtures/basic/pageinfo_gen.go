@@ -6,7 +6,7 @@ package basic
 import (
 	"encoding/json"
 
-	graphql "github.com/neelance/graphql-go"
+	graphql "github.com/graph-gophers/graphql-go"
 )
 
 // PageInfo Information for paginating this connection

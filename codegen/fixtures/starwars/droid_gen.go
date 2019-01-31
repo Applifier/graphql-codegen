@@ -6,7 +6,7 @@ package starwars
 import (
 	"encoding/json"
 
-	graphql "github.com/neelance/graphql-go"
+	graphql "github.com/graph-gophers/graphql-go"
 )
 
 // Droid An autonomous mechanical character in the Star Wars universe

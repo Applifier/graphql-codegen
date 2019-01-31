@@ -6,7 +6,7 @@ package starwars
 import (
 	"encoding/json"
 
-	graphql "github.com/neelance/graphql-go"
+	graphql "github.com/graph-gophers/graphql-go"
 )
 
 // Human A humanoid creature from the Star Wars universe

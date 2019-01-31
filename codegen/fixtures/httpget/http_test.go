@@ -4,7 +4,8 @@ import (
 	"io/ioutil"
 	"testing"
 
-	graphql "github.com/neelance/graphql-go"
+	graphql "github.com/graph-gophers/graphql-go"
+	"github.com/graph-gophers/graphql-go/gqltesting"
 )
 
 func TestHTTPSchema(t *testing.T) {
@@ -15,7 +16,7 @@ func TestHTTPSchema(t *testing.T) {
 
 	resolver := &Resolver{}
 
-	graphql.RunTests(t, []*graphql.Test{
+	gqltesting.RunTests(t, []*gqltesting.Test{
 		{
 			Schema: graphql.MustParseSchema(string(schema), resolver),
 			Query: `

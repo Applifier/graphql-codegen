@@ -6,7 +6,7 @@ package custom_field_types
 import (
 	"encoding/json"
 
-	graphql "github.com/neelance/graphql-go"
+	graphql "github.com/graph-gophers/graphql-go"
 )
 
 // BarFoo

@@ -2,7 +2,7 @@
 
 # graphql-codegen
 
-This tool generates boilerplate code for [graphql-go](https://github.com/neelance/graphql-go) based on a provided graphql.schema file. Additional config file can be provided to customize output.
+This tool generates boilerplate code for [graphql-go](https://github.com/graph-gophers/graphql-go) based on a provided graphql.schema file. Additional config file can be provided to customize output.
 
 ```sh
 go install github.com/Applifier/graphql-codegen

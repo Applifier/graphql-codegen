@@ -4,7 +4,7 @@
 package starwars
 
 import (
-	graphql "github.com/neelance/graphql-go"
+	graphql "github.com/graph-gophers/graphql-go"
 )
 
 // Character A character from the Star Wars universe

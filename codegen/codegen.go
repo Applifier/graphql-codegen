@@ -9,8 +9,8 @@ import (
 
 	"github.com/Applifier/graphql-codegen/config"
 	codegenTemplate "github.com/Applifier/graphql-codegen/template"
-	graphql "github.com/neelance/graphql-go"
-	"github.com/neelance/graphql-go/introspection"
+	graphql "github.com/graph-gophers/graphql-go"
+	"github.com/graph-gophers/graphql-go/introspection"
 )
 
 type typeConfig struct {
@@ -44,7 +44,7 @@ var (
 		"ID": typeConfig{
 			true,
 			"graphql.ID",
-			"graphql \"github.com/neelance/graphql-go\"",
+			"graphql \"github.com/graph-gophers/graphql-go\"",
 		},
 		"String": typeConfig{
 			true,
